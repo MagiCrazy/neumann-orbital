@@ -7,9 +7,9 @@ namespace NeumannOrbital.UI;
 /// Full-screen sector map panel, toggled with [M] or a HUD button.
 public partial class MapPanel : Control
 {
-    private MapCanvas _canvas    = null!;
-    private Panel    _infoBox    = null!;
-    private Label    _infoLabel  = null!;
+    private MapCanvas _canvas = null!;
+    private Panel _infoBox = null!;
+    private Label _infoLabel = null!;
 
     private (int X, int Y, int Z)? _selected;
 
@@ -22,7 +22,7 @@ public partial class MapPanel : Control
 
         var state = AppState.Instance;
         state.SectorDiscovered += (_, _, _) => _canvas.QueueRedraw();
-        state.ProbeUpdated     += ()         => _canvas.QueueRedraw();
+        state.ProbeUpdated += () => _canvas.QueueRedraw();
     }
 
     public void Toggle() => Visible = !Visible;
@@ -51,7 +51,7 @@ public partial class MapPanel : Control
         // Semi-transparent background
         var bg = new Panel();
         bg.AddThemeStyleboxOverride("panel", new StyleBoxFlat
-            { BgColor = new Color(0.02f, 0.03f, 0.06f, 0.92f) });
+        { BgColor = new Color(0.02f, 0.03f, 0.06f, 0.92f) });
         Anc(bg, 0, 0, 1, 1);
         AddChild(bg);
 
@@ -83,12 +83,16 @@ public partial class MapPanel : Control
         _infoBox = new Panel();
         _infoBox.AddThemeStyleboxOverride("panel", new StyleBoxFlat
         {
-            BgColor       = new Color(0.04f, 0.05f, 0.1f, 0.92f),
-            BorderColor   = new Color(0.3f, 0.4f, 0.6f, 0.6f),
-            BorderWidthLeft = 1, BorderWidthRight = 1,
-            BorderWidthTop  = 1, BorderWidthBottom = 1,
-            CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4,
-            CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4,
+            BgColor = new Color(0.04f, 0.05f, 0.1f, 0.92f),
+            BorderColor = new Color(0.3f, 0.4f, 0.6f, 0.6f),
+            BorderWidthLeft = 1,
+            BorderWidthRight = 1,
+            BorderWidthTop = 1,
+            BorderWidthBottom = 1,
+            CornerRadiusTopLeft = 4,
+            CornerRadiusTopRight = 4,
+            CornerRadiusBottomLeft = 4,
+            CornerRadiusBottomRight = 4,
         });
         _infoBox.Visible = false;
         Anc(_infoBox, 1, 0, 1, 0); Off(_infoBox, -280, 36, -12, 220);
@@ -117,12 +121,12 @@ public partial class MapPanel : Control
             box.AddChild(lbl);
         }
 
-        Item("Star",       SectorColor(SectorObjectType.Star));
-        Item("Planet",     SectorColor(SectorObjectType.Planet));
-        Item("Asteroid",   SectorColor(SectorObjectType.Asteroid));
-        Item("System",     SectorColor(SectorObjectType.SolarSystem));
-        Item("Unknown",    new Color(0.2f, 0.22f, 0.28f));
-        Item("● Probe",    new Color(0.3f, 0.8f, 1.0f));
+        Item("Star", SectorColor(SectorObjectType.Star));
+        Item("Planet", SectorColor(SectorObjectType.Planet));
+        Item("Asteroid", SectorColor(SectorObjectType.Asteroid));
+        Item("System", SectorColor(SectorObjectType.SolarSystem));
+        Item("Unknown", new Color(0.2f, 0.22f, 0.28f));
+        Item("● Probe", new Color(0.3f, 0.8f, 1.0f));
 
         return box;
     }
@@ -141,7 +145,7 @@ public partial class MapPanel : Control
         }
 
         var dominant = DominantType(obs);
-        var objects  = obs.Objects is { Count: > 0 } o
+        var objects = obs.Objects is { Count: > 0 } o
             ? string.Join("\n", o.Take(4).Select(obj =>
                 $"  {obj.ObjectType.ToString().ToLowerInvariant()} — {obj.Name ?? "unnamed"}"))
             : "  (no objects)";
@@ -164,13 +168,13 @@ public partial class MapPanel : Control
 
     internal static Color SectorColor(SectorObjectType type) => type switch
     {
-        SectorObjectType.Star        => new Color(1.0f,  0.85f, 0.2f),
-        SectorObjectType.Planet      => new Color(0.2f,  0.6f,  1.0f),
-        SectorObjectType.Asteroid    => new Color(0.55f, 0.45f, 0.35f),
+        SectorObjectType.Star => new Color(1.0f, 0.85f, 0.2f),
+        SectorObjectType.Planet => new Color(0.2f, 0.6f, 1.0f),
+        SectorObjectType.Asteroid => new Color(0.55f, 0.45f, 0.35f),
         SectorObjectType.SolarSystem => new Color(0.85f, 0.85f, 1.0f),
-        SectorObjectType.BlackHole   => new Color(0.5f,  0.1f,  0.7f),
-        SectorObjectType.DustCloud   => new Color(0.4f,  0.45f, 0.5f),
-        _                            => new Color(0.2f,  0.22f, 0.28f),
+        SectorObjectType.BlackHole => new Color(0.5f, 0.1f, 0.7f),
+        SectorObjectType.DustCloud => new Color(0.4f, 0.45f, 0.5f),
+        _ => new Color(0.2f, 0.22f, 0.28f),
     };
 
     internal static Color SectorColor(SectorObjectType type, float alpha)
@@ -181,11 +185,11 @@ public partial class MapPanel : Control
     internal static SectorObjectType DominantType(SectorObservation obs)
     {
         if (obs.Objects is not { Count: > 0 } o) return SectorObjectType.Unknown;
-        if (o.Any(x => x.ObjectType == SectorObjectType.Star))        return SectorObjectType.Star;
-        if (o.Any(x => x.ObjectType == SectorObjectType.BlackHole))   return SectorObjectType.BlackHole;
+        if (o.Any(x => x.ObjectType == SectorObjectType.Star)) return SectorObjectType.Star;
+        if (o.Any(x => x.ObjectType == SectorObjectType.BlackHole)) return SectorObjectType.BlackHole;
         if (o.Any(x => x.ObjectType == SectorObjectType.SolarSystem)) return SectorObjectType.SolarSystem;
-        if (o.Any(x => x.ObjectType == SectorObjectType.Planet))      return SectorObjectType.Planet;
-        if (o.Any(x => x.ObjectType == SectorObjectType.Asteroid))    return SectorObjectType.Asteroid;
+        if (o.Any(x => x.ObjectType == SectorObjectType.Planet)) return SectorObjectType.Planet;
+        if (o.Any(x => x.ObjectType == SectorObjectType.Asteroid)) return SectorObjectType.Asteroid;
         return SectorObjectType.Unknown;
     }
 
@@ -226,10 +230,10 @@ internal partial class MapCanvas : Control
         foreach (var (coords, obs) in sectors)
         {
             var screen = GridToScreen(coords.X, coords.Y, transform, cellSize);
-            var rect   = new Rect2(screen + Vector2.One, new Vector2(cellSize - 2, cellSize - 2));
+            var rect = new Rect2(screen + Vector2.One, new Vector2(cellSize - 2, cellSize - 2));
 
             var dominant = MapPanel.DominantType(obs);
-            var alpha    = (float)Math.Clamp(obs.Confidence * 0.8 + 0.2, 0.2, 1.0);
+            var alpha = (float)Math.Clamp(obs.Confidence * 0.8 + 0.2, 0.2, 1.0);
             DrawRect(rect, MapPanel.SectorColor(dominant, alpha), true);
 
             // Selection highlight
@@ -267,16 +271,16 @@ internal partial class MapCanvas : Control
                          + new Vector2(cellSize * 0.5f, cellSize * 0.5f);
 
             // Dashed travel line
-            var dir    = (targetPt - originPt);
-            float len  = dir.Length();
+            var dir = (targetPt - originPt);
+            float len = dir.Length();
             if (len > 0.1f)
             {
-                var unit   = dir / len;
+                var unit = dir / len;
                 float dash = 8f, gap = 5f, pos = 0f;
                 while (pos < len)
                 {
                     var from = originPt + unit * pos;
-                    var to   = originPt + unit * Math.Min(pos + dash, len);
+                    var to = originPt + unit * Math.Min(pos + dash, len);
                     DrawLine(from, to, new Color(0.3f, 0.8f, 1.0f, 0.5f), 1.5f);
                     pos += dash + gap;
                 }
@@ -301,7 +305,7 @@ internal partial class MapCanvas : Control
             var probePos = originPt.Lerp(targetPt, (float)progress);
             var r = cellSize * 0.28f;
             DrawCircle(probePos, r + 2, new Color(0, 0, 0, 0.6f));
-            DrawCircle(probePos, r,     new Color(0.3f, 0.8f, 1.0f));
+            DrawCircle(probePos, r, new Color(0.3f, 0.8f, 1.0f));
             // Speed trail
             if (progress > 0.01)
             {
@@ -317,7 +321,7 @@ internal partial class MapCanvas : Control
                        + new Vector2(cellSize * 0.5f, cellSize * 0.5f);
             var r = cellSize * 0.28f;
             DrawCircle(center, r + 2, new Color(0, 0, 0, 0.6f));
-            DrawCircle(center, r,     new Color(0.3f, 0.8f, 1.0f));
+            DrawCircle(center, r, new Color(0.3f, 0.8f, 1.0f));
         }
     }
 
@@ -333,7 +337,7 @@ internal partial class MapCanvas : Control
         foreach (var coords in sectors.Keys)
         {
             var screen = GridToScreen(coords.X, coords.Y, transform, cellSize);
-            var rect   = new Rect2(screen, new Vector2(cellSize, cellSize));
+            var rect = new Rect2(screen, new Vector2(cellSize, cellSize));
             if (rect.HasPoint(mb.Position))
             {
                 _panel.SelectSector(coords);
@@ -384,13 +388,13 @@ internal partial class MapCanvas : Control
         for (int x = minX; x <= maxX + 1; x++)
         {
             var from = GridToScreen(x, minY, t, cellSize);
-            var to   = GridToScreen(x, maxY + 1, t, cellSize);
+            var to = GridToScreen(x, maxY + 1, t, cellSize);
             DrawLine(from, to, gridColor);
         }
         for (int y = minY; y <= maxY + 1; y++)
         {
             var from = GridToScreen(minX, y, t, cellSize);
-            var to   = GridToScreen(maxX + 1, y, t, cellSize);
+            var to = GridToScreen(maxX + 1, y, t, cellSize);
             DrawLine(from, to, gridColor);
         }
     }

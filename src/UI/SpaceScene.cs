@@ -7,9 +7,9 @@ namespace NeumannOrbital.UI;
 
 public partial class SpaceScene : Node3D
 {
-    private Node3D    _starsRoot  = null!;
-    private CameraRig _cameraRig  = null!;
-    private Node3D?   _binaryRig;
+    private Node3D _starsRoot = null!;
+    private CameraRig _cameraRig = null!;
+    private Node3D? _binaryRig;
     private readonly List<(Node3D Rig, float Speed)> _orbitRigs = new();
     private (int X, int Y, int Z)? _renderedSector;
 
@@ -30,7 +30,7 @@ public partial class SpaceScene : Node3D
         AddChild(_cameraRig);
 
         var state = AppState.Instance;
-        state.ProbeUpdated  += RenderCurrentSystem;
+        state.ProbeUpdated += RenderCurrentSystem;
         state.SectorUpdated += OnSectorUpdated;
 
         RenderCurrentSystem();
@@ -39,7 +39,7 @@ public partial class SpaceScene : Node3D
     public override void _ExitTree()
     {
         if (AppState.Instance is not { } s) return;
-        s.ProbeUpdated  -= RenderCurrentSystem;
+        s.ProbeUpdated -= RenderCurrentSystem;
         s.SectorUpdated -= OnSectorUpdated;
     }
 
@@ -61,8 +61,8 @@ public partial class SpaceScene : Node3D
         switch (key.Keycode)
         {
             case Key.Space: _cameraRig.SnapTo(Vector3.Zero); break;
-            case Key.Q:     GetTree().Quit();                break;
-            case Key.R:     AppState.Instance.TriggerRefresh(); break;
+            case Key.Q: GetTree().Quit(); break;
+            case Key.R: AppState.Instance.TriggerRefresh(); break;
         }
     }
 
@@ -81,14 +81,22 @@ public partial class SpaceScene : Node3D
         foreach (var child in _starsRoot.GetChildren())
             child.QueueFree();
 
-        if (!AppState.Instance.KnownSectors.TryGetValue(coords, out var obs)) return;
-
         _renderedSector = coords;
+
+        if (!AppState.Instance.KnownSectors.TryGetValue(coords, out var obs))
+        {
+            _starsRoot.AddChild(EmptySectorLabel("scanning…"));
+            return;
+        }
 
         var systems = obs.Objects?
             .Where(o => o.ObjectType == SectorObjectType.SolarSystem)
             .ToList();
-        if (systems is null or { Count: 0 }) return;
+        if (systems is null or { Count: 0 })
+        {
+            _starsRoot.AddChild(EmptySectorLabel("empty sector"));
+            return;
+        }
 
         _binaryRig = null;
         _orbitRigs.Clear();
@@ -107,11 +115,11 @@ public partial class SpaceScene : Node3D
             }
             else
             {
-                int    starCount   = Helpers.ParseStarCount(sys.Summary);
-                double sysMass     = sys.Mass ?? 1.0;
+                int starCount = Helpers.ParseStarCount(sys.Summary);
+                double sysMass = sys.Mass ?? 1.0;
                 double massPerStar = sysMass / Math.Max(starCount, 1);
-                float  starR       = StarRadius(massPerStar);
-                float  separation  = Mathf.Max(starR * 3.5f, 4.0f);
+                float starR = StarRadius(massPerStar);
+                float separation = Mathf.Max(starR * 3.5f, 4.0f);
 
                 if (starCount == 1)
                 {
@@ -158,11 +166,11 @@ public partial class SpaceScene : Node3D
 
         for (int i = 0; i < stars.Count; i++)
         {
-            float r         = StarRadius(stars[i].Mass ?? 1.0);
+            float r = StarRadius(stars[i].Mass ?? 1.0);
             float separation = Mathf.Max(r * 3.5f, 4.0f);
             maxR = Mathf.Max(maxR, separation + r);
 
-            var node  = BuildStar(stars[i].Mass ?? 1.0);
+            var node = BuildStar(stars[i].Mass ?? 1.0);
             float angle = i * Mathf.Tau / stars.Count;
             node.Position = new Vector3(
                 Mathf.Sin(angle) * separation, 0f,
@@ -190,11 +198,11 @@ public partial class SpaceScene : Node3D
         }
 
         // Fallback: synthesize from summary + minableTargets
-        int total     = Helpers.ParseOrbitalCount(sys.Summary);
+        int total = Helpers.ParseOrbitalCount(sys.Summary);
         if (total == 0) return [];
-        var minables  = sys.MinableTargets ?? [];
+        var minables = sys.MinableTargets ?? [];
         int asteroids = minables.Count;
-        int planets   = Math.Max(total - asteroids, 0);
+        int planets = Math.Max(total - asteroids, 0);
 
         var list = new List<ApiSectorObject>();
         for (int i = 0; i < planets; i++)
@@ -216,7 +224,7 @@ public partial class SpaceScene : Node3D
 
         for (int i = 0; i < bodies.Count; i++)
         {
-            var   obj   = bodies[i];
+            var obj = bodies[i];
             float bodyR = BodyRadius(obj);
 
             orbitR += bodyR + 3f;
@@ -245,10 +253,10 @@ public partial class SpaceScene : Node3D
     {
         var color = type switch
         {
-            SectorObjectType.Planet    => new Color(0.35f, 0.55f, 0.9f,  0.5f),
-            SectorObjectType.Asteroid  => new Color(0.7f,  0.5f,  0.25f, 0.45f),
-            SectorObjectType.BlackHole => new Color(0.55f, 0.1f,  0.85f, 0.55f),
-            _                          => new Color(0.5f,  0.5f,  0.55f, 0.35f),
+            SectorObjectType.Planet => new Color(0.35f, 0.55f, 0.9f, 0.5f),
+            SectorObjectType.Asteroid => new Color(0.7f, 0.5f, 0.25f, 0.45f),
+            SectorObjectType.BlackHole => new Color(0.55f, 0.1f, 0.85f, 0.55f),
+            _ => new Color(0.5f, 0.5f, 0.55f, 0.35f),
         };
 
         const int segments = 128;
@@ -268,36 +276,38 @@ public partial class SpaceScene : Node3D
             MaterialOverride = new StandardMaterial3D
             {
                 VertexColorUseAsAlbedo = true,
-                ShadingMode            = BaseMaterial3D.ShadingModeEnum.Unshaded,
-                Transparency           = BaseMaterial3D.TransparencyEnum.Alpha,
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
             },
         };
     }
 
     private static Node3D BuildBody(ApiSectorObject obj, int index) => obj.ObjectType switch
     {
-        SectorObjectType.Planet    => BuildPlanet(obj, index),
-        SectorObjectType.Asteroid  => BuildAsteroid(obj),
+        SectorObjectType.Planet => BuildPlanet(obj, index),
+        SectorObjectType.Asteroid => BuildAsteroid(obj),
         SectorObjectType.BlackHole => BuildBlackHole(obj),
-        _                          => BuildPlanet(obj, index),
+        _ => BuildPlanet(obj, index),
     };
 
     private static Node3D BuildPlanet(ApiSectorObject obj, int index)
     {
         var node = new Node3D { Name = obj.Name ?? $"Planet{index}" };
-        float r  = BodyRadius(obj);
+        float r = BodyRadius(obj);
 
         // Pick texture deterministically from name/id hash
-        var hash    = Math.Abs((obj.Id ?? obj.Name ?? index.ToString()).GetHashCode());
+        var hash = Math.Abs((obj.Id ?? obj.Name ?? index.ToString()).GetHashCode());
         var texPath = $"res://resources/planets/planet0{hash % 10}.png";
-        var tex     = GD.Load<Texture2D>(texPath);
+        var tex = GD.Load<Texture2D>(texPath);
 
         node.AddChild(new MeshInstance3D
         {
             Mesh = new SphereMesh
             {
-                Radius = r, Height = r * 2f,
-                RadialSegments = 32, Rings = 16,
+                Radius = r,
+                Height = r * 2f,
+                RadialSegments = 32,
+                Rings = 16,
                 Material = new StandardMaterial3D
                 {
                     AlbedoTexture = tex,
@@ -316,27 +326,29 @@ public partial class SpaceScene : Node3D
     private static Node3D BuildAsteroid(ApiSectorObject obj)
     {
         var node = new Node3D { Name = obj.Name ?? "Asteroid" };
-        float r  = BodyRadius(obj);
+        float r = BodyRadius(obj);
 
         // Irregular look: slightly squashed sphere
         node.AddChild(new MeshInstance3D
         {
             Mesh = new SphereMesh
             {
-                Radius = r, Height = r * 1.4f,
-                RadialSegments = 8, Rings = 4,
+                Radius = r,
+                Height = r * 1.4f,
+                RadialSegments = 8,
+                Rings = 4,
                 Material = new StandardMaterial3D
                 {
                     AlbedoColor = new Color(0.42f, 0.36f, 0.28f),
-                    Roughness   = 1.0f,
-                    Metallic    = 0.0f,
+                    Roughness = 1.0f,
+                    Metallic = 0.0f,
                 },
             },
             // Random scale jitter for irregular look
             Scale = new Vector3(
                 1.0f + (Math.Abs(obj.GetHashCode()) % 40 - 20) * 0.01f,
                 0.7f + (Math.Abs((obj.Name ?? "").GetHashCode()) % 30) * 0.01f,
-                1.0f + (Math.Abs((obj.Id  ?? "").GetHashCode()) % 40 - 20) * 0.01f),
+                1.0f + (Math.Abs((obj.Id ?? "").GetHashCode()) % 40 - 20) * 0.01f),
         });
 
         return node;
@@ -345,15 +357,17 @@ public partial class SpaceScene : Node3D
     private static Node3D BuildBlackHole(ApiSectorObject obj)
     {
         var node = new Node3D { Name = obj.Name ?? "BlackHole" };
-        float r  = BodyRadius(obj);
+        float r = BodyRadius(obj);
 
         // Event horizon — pitch black
         node.AddChild(new MeshInstance3D
         {
             Mesh = new SphereMesh
             {
-                Radius = r, Height = r * 2f,
-                RadialSegments = 32, Rings = 16,
+                Radius = r,
+                Height = r * 2f,
+                RadialSegments = 32,
+                Rings = 16,
                 Material = new StandardMaterial3D
                 {
                     AlbedoColor = Colors.Black,
@@ -367,13 +381,15 @@ public partial class SpaceScene : Node3D
         {
             Mesh = new SphereMesh
             {
-                Radius = r * 2.0f, Height = r * 0.3f,
-                RadialSegments = 32, Rings = 4,
+                Radius = r * 2.0f,
+                Height = r * 0.3f,
+                RadialSegments = 32,
+                Rings = 4,
                 Material = new StandardMaterial3D
                 {
-                    AlbedoColor  = new Color(0.5f, 0.1f, 0.8f, 0.35f),
+                    AlbedoColor = new Color(0.5f, 0.1f, 0.8f, 0.35f),
                     Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
-                    ShadingMode  = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                    ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
                 },
             },
         });
@@ -390,25 +406,25 @@ public partial class SpaceScene : Node3D
 
         return obj.ObjectType switch
         {
-            SectorObjectType.Planet    => 0.8f,
-            SectorObjectType.Asteroid  => 0.3f,
+            SectorObjectType.Planet => 0.8f,
+            SectorObjectType.Asteroid => 0.3f,
             SectorObjectType.BlackHole => 1.2f,
-            _                          => 0.5f,
+            _ => 0.5f,
         };
     }
 
     private static Node3D BuildStar(double massPerStar)
     {
-        var node  = new Node3D();
+        var node = new Node3D();
         var color = StarColor(massPerStar);
-        var r     = StarRadius(massPerStar);
+        var r = StarRadius(massPerStar);
 
         // Point light at the star's centre — tints the scene with its spectral color
         node.AddChild(new OmniLight3D
         {
-            LightColor  = color,
+            LightColor = color,
             LightEnergy = 3.0f,
-            OmniRange   = 300f,
+            OmniRange = 300f,
         });
 
         // Star body: Unshaded + AlbedoColor = self-luminous, unaffected by external lights
@@ -416,8 +432,10 @@ public partial class SpaceScene : Node3D
         {
             Mesh = new SphereMesh
             {
-                Radius = r, Height = r * 2f,
-                RadialSegments = 32, Rings = 16,
+                Radius = r,
+                Height = r * 2f,
+                RadialSegments = 32,
+                Rings = 16,
                 Material = new StandardMaterial3D
                 {
                     AlbedoColor = color,
@@ -431,13 +449,15 @@ public partial class SpaceScene : Node3D
         {
             Mesh = new SphereMesh
             {
-                Radius = r * 1.15f, Height = r * 2.3f,
-                RadialSegments = 16, Rings = 8,
+                Radius = r * 1.15f,
+                Height = r * 2.3f,
+                RadialSegments = 16,
+                Rings = 8,
                 Material = new StandardMaterial3D
                 {
-                    AlbedoColor  = new Color(color.R, color.G, color.B, 0.12f),
+                    AlbedoColor = new Color(color.R, color.G, color.B, 0.12f),
                     Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
-                    ShadingMode  = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                    ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
                 },
             },
         });
@@ -452,11 +472,11 @@ public partial class SpaceScene : Node3D
     {
         >= 30.0 => new Color(0.6f, 0.7f, 1.0f),   // O — blue
         >= 10.0 => new Color(0.75f, 0.85f, 1.0f),  // B — blue-white
-        >= 4.0  => new Color(0.95f, 0.97f, 1.0f),  // A — white
-        >= 1.5  => new Color(1.0f, 1.0f, 0.9f),    // F — yellow-white
-        >= 0.9  => new Color(1.0f, 0.95f, 0.6f),   // G — yellow (sun-like)
-        >= 0.5  => new Color(1.0f, 0.7f, 0.35f),   // K — orange
-        _       => new Color(1.0f, 0.35f, 0.2f),   // M — red
+        >= 4.0 => new Color(0.95f, 0.97f, 1.0f),  // A — white
+        >= 1.5 => new Color(1.0f, 1.0f, 0.9f),    // F — yellow-white
+        >= 0.9 => new Color(1.0f, 0.95f, 0.6f),   // G — yellow (sun-like)
+        >= 0.5 => new Color(1.0f, 0.7f, 0.35f),   // K — orange
+        _ => new Color(1.0f, 0.35f, 0.2f),   // M — red
     };
 
     /// Visual radius — logarithmic scale so extreme masses (56 M☉+) stay reasonable.
@@ -465,31 +485,44 @@ public partial class SpaceScene : Node3D
 
     // ── Scene construction ────────────────────────────────────────────────────
 
+    private static Label3D EmptySectorLabel(string text) => new()
+    {
+        Text = text,
+        FontSize = 24,
+        Modulate = new Color(0.35f, 0.38f, 0.52f),
+        Billboard = BaseMaterial3D.BillboardMode.Enabled,
+        NoDepthTest = true,
+        Position = new Vector3(0f, 0f, -15f),
+    };
+
     private void BuildEnvironment()
     {
         var env = new Godot.Environment();
-        env.BackgroundMode  = Godot.Environment.BGMode.Color;
+        env.BackgroundMode = Godot.Environment.BGMode.Color;
         env.BackgroundColor = new Color(0.005f, 0.005f, 0.02f);
-        env.GlowEnabled      = true;
-        env.GlowIntensity    = 0.8f;
-        env.GlowBloom        = 0.1f;
+        env.GlowEnabled = true;
+        env.GlowIntensity = 0.8f;
+        env.GlowBloom = 0.1f;
         env.GlowHdrThreshold = 0.7f;
         AddChild(new WorldEnvironment { Name = "Env", Environment = env });
     }
 
     private void BuildStarField()
     {
-        const int   count  = 3000;
+        const int count = 3000;
         const float radius = 500f;
 
         var starMesh = new SphereMesh
         {
-            Radius = 0.15f, Height = 0.3f, RadialSegments = 4, Rings = 2,
+            Radius = 0.15f,
+            Height = 0.3f,
+            RadialSegments = 4,
+            Rings = 2,
             Material = new StandardMaterial3D
             {
-                AlbedoColor              = Colors.White,
-                EmissionEnabled          = true,
-                Emission                 = new Color(0.9f, 0.9f, 1.0f),
+                AlbedoColor = Colors.White,
+                EmissionEnabled = true,
+                Emission = new Color(0.9f, 0.9f, 1.0f),
                 EmissionEnergyMultiplier = 1.5f,
             },
         };
@@ -497,8 +530,8 @@ public partial class SpaceScene : Node3D
         var mm = new MultiMesh
         {
             TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
-            Mesh            = starMesh,
-            InstanceCount   = count,
+            Mesh = starMesh,
+            InstanceCount = count,
         };
 
         var rng = new RandomNumberGenerator { Seed = 42 };

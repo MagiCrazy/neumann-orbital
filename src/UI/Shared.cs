@@ -6,7 +6,7 @@ internal static class Helpers
 {
     internal static string FormatDuration(TimeSpan t)
     {
-        if (t.TotalHours   >= 1) return $"{(int)t.TotalHours}h{t.Minutes:D2}m";
+        if (t.TotalHours >= 1) return $"{(int)t.TotalHours}h{t.Minutes:D2}m";
         if (t.TotalMinutes >= 1) return $"{(int)t.TotalMinutes}m{t.Seconds:D2}s";
         return $"{t.Seconds}s";
     }

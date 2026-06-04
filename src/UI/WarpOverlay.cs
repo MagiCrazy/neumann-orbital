@@ -15,11 +15,11 @@ public partial class WarpOverlay : Control
         public float Alpha;
     }
 
-    private const int   Count      = 220;
-    private const float MinSpeed   = 350f;
-    private const float MaxSpeed   = 1100f;
-    private const float MinLen     = 50f;
-    private const float MaxLen     = 220f;
+    private const int Count = 220;
+    private const float MinSpeed = 350f;
+    private const float MaxSpeed = 1100f;
+    private const float MinLen = 50f;
+    private const float MaxLen = 220f;
 
     private readonly Streak[] _streaks = new Streak[Count];
     private readonly RandomNumberGenerator _rng = new() { Seed = 7777 };
@@ -54,7 +54,7 @@ public partial class WarpOverlay : Control
 
     public override void _Draw()
     {
-        var size   = GetViewportRect().Size;
+        var size = GetViewportRect().Size;
         var center = size / 2f;
 
         // Dark space background
@@ -63,18 +63,18 @@ public partial class WarpOverlay : Control
         // Radial streaks
         foreach (var s in _streaks)
         {
-            var dir  = new Vector2(Mathf.Cos(s.Angle), Mathf.Sin(s.Angle));
+            var dir = new Vector2(Mathf.Cos(s.Angle), Mathf.Sin(s.Angle));
             var from = center + dir * s.Dist;
-            var to   = center + dir * (s.Dist + s.Length);
+            var to = center + dir * (s.Dist + s.Length);
 
             // Fade in from centre, bright middle, fade at far edge
-            float t     = Mathf.Clamp(s.Dist / 120f, 0f, 1f);
+            float t = Mathf.Clamp(s.Dist / 120f, 0f, 1f);
             float alpha = s.Alpha * t;
-            var   inner = new Color(1.0f, 1.0f, 1.0f, alpha);
-            var   outer = new Color(0.45f, 0.6f, 1.0f, alpha * 0.4f);
+            var inner = new Color(1.0f, 1.0f, 1.0f, alpha);
+            var outer = new Color(0.45f, 0.6f, 1.0f, alpha * 0.4f);
 
-            DrawLine(from, to, inner,   1.8f);
-            DrawLine(from, to, outer,   3.5f);   // soft glow around streak
+            DrawLine(from, to, inner, 1.8f);
+            DrawLine(from, to, outer, 3.5f);   // soft glow around streak
         }
 
         // Central vanishing-point glow
@@ -83,7 +83,7 @@ public partial class WarpOverlay : Control
             float a = (1f - r / 120f) * 0.06f;
             DrawCircle(center, r, new Color(0.55f, 0.7f, 1.0f, a));
         }
-        DrawCircle(center, 8f,  new Color(1.0f, 1.0f, 1.0f, 0.9f));
+        DrawCircle(center, 8f, new Color(1.0f, 1.0f, 1.0f, 0.9f));
         DrawCircle(center, 18f, new Color(0.8f, 0.9f, 1.0f, 0.35f));
 
         // Probe silhouette — simple arrow shape at centre
@@ -98,7 +98,7 @@ public partial class WarpOverlay : Control
         var probe = AppState.Instance.Probe;
         if (probe?.Movement is not { } mv) return;
 
-        var now      = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow;
         var totalSec = (mv.ArrivalAt - mv.StartedAt).TotalSeconds;
         double progress = totalSec > 0
             ? Math.Clamp((now - mv.StartedAt).TotalSeconds / totalSec, 0.0, 1.0)
@@ -112,11 +112,11 @@ public partial class WarpOverlay : Control
         var ty = (int)Math.Round(mv.Target.Y);
         var tz = (int)Math.Round(mv.Target.Z);
 
-        var font   = ThemeDB.FallbackFont;
+        var font = ThemeDB.FallbackFont;
         float panelW = 480f;
         float panelH = 120f;
-        float px     = (size.X - panelW) / 2f;
-        float py     = size.Y - panelH - 30f;
+        float px = (size.X - panelW) / 2f;
+        float py = size.Y - panelH - 30f;
 
         // Panel background
         DrawRect(new Rect2(px, py, panelW, panelH),
@@ -138,20 +138,20 @@ public partial class WarpOverlay : Control
         // Row 2: phase + ETA + speed
         var phase = mv.Phase?.ToString()?.ToLowerInvariant()
                  ?? mv.Status.ToString().ToLowerInvariant();
-        var eta   = remaining > TimeSpan.Zero ? Helpers.FormatDuration(remaining) : "arriving…";
+        var eta = remaining > TimeSpan.Zero ? Helpers.FormatDuration(remaining) : "arriving…";
         var speed = mv.EstimatedVelocityC is { } v ? $"  ·  {v:F3}c" : "";
         DrawString(font, new Vector2(lx, py + 42f),
             $"{phase}  ·  ETA {eta}{speed}", HorizontalAlignment.Left,
             -1, (int)font12, new Color(0.5f, 0.65f, 0.88f));
 
         // Ship-along-route progress
-        float barX  = lx;
-        float barY  = py + 68f;
-        float barW  = panelW - 32f;
+        float barX = lx;
+        float barY = py + 68f;
+        float barW = panelW - 32f;
         float shipX = barX + barW * (float)progress;
 
         // Route line — dim before ship, bright after
-        DrawLine(new Vector2(barX,  barY), new Vector2(shipX, barY),
+        DrawLine(new Vector2(barX, barY), new Vector2(shipX, barY),
             new Color(0.35f, 0.6f, 1.0f, 0.25f), 2f);
         DrawLine(new Vector2(shipX, barY), new Vector2(barX + barW, barY),
             new Color(0.25f, 0.35f, 0.6f, 0.18f), 2f);
@@ -206,8 +206,8 @@ public partial class WarpOverlay : Control
 
     // ── Public control ────────────────────────────────────────────────────────
 
-    public void ShowWarp()  { Visible = true;  }
-    public void HideWarp()  { Visible = false; }
+    public void ShowWarp() { Visible = true; }
+    public void HideWarp() { Visible = false; }
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
@@ -223,11 +223,11 @@ public partial class WarpOverlay : Control
         float maxR = size.Length() * 0.65f;
         return new Streak
         {
-            Angle  = _rng.RandfRange(0f, Mathf.Tau),
-            Dist   = _rng.RandfRange(8f, maxR * maxDistFraction + 8f),
-            Speed  = _rng.RandfRange(MinSpeed, MaxSpeed),
+            Angle = _rng.RandfRange(0f, Mathf.Tau),
+            Dist = _rng.RandfRange(8f, maxR * maxDistFraction + 8f),
+            Speed = _rng.RandfRange(MinSpeed, MaxSpeed),
             Length = _rng.RandfRange(MinLen, MaxLen),
-            Alpha  = _rng.RandfRange(0.55f, 1.0f),
+            Alpha = _rng.RandfRange(0.55f, 1.0f),
         };
     }
 

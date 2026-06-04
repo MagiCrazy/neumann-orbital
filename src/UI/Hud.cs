@@ -7,25 +7,25 @@ namespace NeumannOrbital.UI;
 public partial class Hud : CanvasLayer
 {
     // Top bar
-    private Label    _probeLabel = null!;
+    private Label _probeLabel = null!;
     private LineEdit _navX = null!;
     private LineEdit _navY = null!;
     private LineEdit _navZ = null!;
 
     // Gauge strip
-    private Label _fuelLabel      = null!;
+    private Label _fuelLabel = null!;
     private Label _integrityLabel = null!;
-    private Label _cargoLabel     = null!;
-    private Label _etaLabel       = null!;
+    private Label _cargoLabel = null!;
+    private Label _etaLabel = null!;
 
     // Main panels
-    private VBoxContainer _currentBox   = null!;
+    private VBoxContainer _currentBox = null!;
     private VBoxContainer _neighborsBox = null!;
-    private VBoxContainer _manniesBox   = null!;
+    private VBoxContainer _manniesBox = null!;
 
-    private MapPanel    _mapPanel    = null!;
+    private MapPanel _mapPanel = null!;
     private WarpOverlay _warpOverlay = null!;
-    private int         _scanPending;
+    private int _scanPending;
 
     private bool IsScanning => _scanPending > 0;
 
@@ -45,10 +45,10 @@ public partial class Hud : CanvasLayer
         BuildLayout();
 
         var s = AppState.Instance;
-        s.ProbeUpdated     += OnProbeUpdated;
-        s.ManniesUpdated   += OnManniesUpdated;
+        s.ProbeUpdated += OnProbeUpdated;
+        s.ManniesUpdated += OnManniesUpdated;
         s.SectorDiscovered += OnSectorDiscovered;
-        s.SectorUpdated    += OnSectorUpdated;
+        s.SectorUpdated += OnSectorUpdated;
 
         OnProbeUpdated();
         OnManniesUpdated();
@@ -57,10 +57,10 @@ public partial class Hud : CanvasLayer
     public override void _ExitTree()
     {
         if (AppState.Instance is not { } s) return;
-        s.ProbeUpdated     -= OnProbeUpdated;
-        s.ManniesUpdated   -= OnManniesUpdated;
+        s.ProbeUpdated -= OnProbeUpdated;
+        s.ManniesUpdated -= OnManniesUpdated;
         s.SectorDiscovered -= OnSectorDiscovered;
-        s.SectorUpdated    -= OnSectorUpdated;
+        s.SectorUpdated -= OnSectorUpdated;
     }
 
     private void OnSectorDiscovered(int x, int y, int z) => RenderNeighbors();
@@ -71,7 +71,7 @@ public partial class Hud : CanvasLayer
 
         var rem = mv.ArrivalAt - DateTimeOffset.UtcNow;
 
-        _etaLabel.Text     = rem > TimeSpan.Zero ? $"ETA {Helpers.FormatDuration(rem)}" : "Arriving…";
+        _etaLabel.Text = rem > TimeSpan.Zero ? $"ETA {Helpers.FormatDuration(rem)}" : "Arriving…";
         _etaLabel.Modulate = new Color(0.9f, 0.85f, 0.4f);
     }
 
@@ -125,7 +125,7 @@ public partial class Hud : CanvasLayer
 
     private void BuildLayout()
     {
-        const float topH   = 40f;
+        const float topH = 40f;
         const float gaugeH = 28f;
 
         // ── Top bar ──────────────────────────────────────────────────────────
@@ -141,7 +141,7 @@ public partial class Hud : CanvasLayer
         _probeLabel = new Label
         {
             SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
-            VerticalAlignment   = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
         };
         _probeLabel.AddThemeFontSizeOverride("font_size", 13);
         topRow.AddChild(_probeLabel);
@@ -158,9 +158,9 @@ public partial class Hud : CanvasLayer
         _navZ = NavInput("Z"); topRow.AddChild(_navZ);
         topRow.AddChild(Btn("Go", OnGoPressed));
 
-        topRow.AddChild(Btn("Map [M]",      () => _mapPanel.Toggle()));
-        topRow.AddChild(Btn("Refresh [R]",  () => AppState.Instance.TriggerRefresh()));
-        topRow.AddChild(Btn("Quit [Q]",     () => GetTree().Quit()));
+        topRow.AddChild(Btn("Map [M]", () => _mapPanel.Toggle()));
+        topRow.AddChild(Btn("Refresh [R]", () => AppState.Instance.TriggerRefresh()));
+        topRow.AddChild(Btn("Quit [Q]", () => GetTree().Quit()));
 
         // ── Gauge strip ───────────────────────────────────────────────────────
         var gaugePanel = Panel(new Color(0.02f, 0.03f, 0.06f, 0.8f));
@@ -172,10 +172,10 @@ public partial class Hud : CanvasLayer
         Anc(gaugeRow, 0, 0, 1, 1); Off(gaugeRow, 12, 0, -12, 0);
         gaugePanel.AddChild(gaugeRow);
 
-        _fuelLabel      = GaugeLabel(gaugeRow);
+        _fuelLabel = GaugeLabel(gaugeRow);
         _integrityLabel = GaugeLabel(gaugeRow);
-        _cargoLabel     = GaugeLabel(gaugeRow);
-        _etaLabel       = GaugeLabel(gaugeRow);
+        _cargoLabel = GaugeLabel(gaugeRow);
+        _etaLabel = GaugeLabel(gaugeRow);
 
         // ── Left panel: current sector + mannies ──────────────────────────────
         // 15% wide, anchored to the left edge, vertically centred (20%–82%)
@@ -230,22 +230,22 @@ public partial class Hud : CanvasLayer
         var dot = probe.Status switch
         {
             ProbeStatus.Dead or ProbeStatus.Disabled => "✖",
-            ProbeStatus.Idle                         => "●",
-            _                                        => "◉",
+            ProbeStatus.Idle => "●",
+            _ => "◉",
         };
         _probeLabel.Text = $"NEUMANN ORBITAL    {probe.Name}    {dot} {probe.Status.ToString().ToUpperInvariant()}";
 
         var fuel = Ratio(probe.Fuel.Deuterium ?? 0, 100.0);
-        _fuelLabel.Text     = $"Fuel  {Bar(fuel, 6)}  {fuel * 100:F0}%";
+        _fuelLabel.Text = $"Fuel  {Bar(fuel, 6)}  {fuel * 100:F0}%";
         _fuelLabel.Modulate = GaugeColor(fuel);
 
         var integrity = probe.Systems is { } sys ? Ratio(sys.IntegrityPercent ?? 100, 100) : 1.0;
-        _integrityLabel.Text     = $"Integrity  {Bar(integrity, 6)}  {integrity * 100:F0}%";
+        _integrityLabel.Text = $"Integrity  {Bar(integrity, 6)}  {integrity * 100:F0}%";
         _integrityLabel.Modulate = GaugeColor(integrity);
 
-        var inv   = probe.Inventory;
+        var inv = probe.Inventory;
         var cargo = inv.Capacity > 0 ? Ratio(inv.UsedCapacity, inv.Capacity) : 0.0;
-        _cargoLabel.Text     = $"Cargo  {Bar(cargo, 6)}  {inv.UsedCapacity:F1}/{inv.Capacity:F1}";
+        _cargoLabel.Text = $"Cargo  {Bar(cargo, 6)}  {inv.UsedCapacity:F1}/{inv.Capacity:F1}";
         _cargoLabel.Modulate = GaugeColor(cargo);
 
         if (probe.Movement is null) _etaLabel.Text = "";
@@ -314,7 +314,7 @@ public partial class Hud : CanvasLayer
         if (sectors.TryGetValue((px, py, pz), out var cur))
         {
             var scanPct = cur.Scan.ScanQuality * 100;
-            var curRow  = new HBoxContainer();
+            var curRow = new HBoxContainer();
             curRow.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
             _neighborsBox.AddChild(curRow);
 
@@ -371,8 +371,8 @@ public partial class Hud : CanvasLayer
 
             if (sectors.TryGetValue(coords, out var obs))
             {
-                var ast    = HasAsteroids(obs) ? " ▲" : "";
-                var lbl    = new Label
+                var ast = HasAsteroids(obs) ? " ▲" : "";
+                var lbl = new Label
                 {
                     Text = $"({coords.X},{coords.Y},{coords.Z})  {KnowledgeAbbrev(obs.KnowledgeLevel)}" +
                            $"  {Bar(obs.Confidence, 4)}  {obs.Confidence * 100:F0}%{ast}",
@@ -416,15 +416,15 @@ public partial class Hud : CanvasLayer
 
         foreach (var manny in mannies)
         {
-            var dot  = manny.CurrentTask is null ? "◌" : "●";
+            var dot = manny.CurrentTask is null ? "◌" : "●";
             var task = manny.CurrentTask?.ToString().ToLowerInvariant() ?? "idle";
             var prog = manny.CurrentTask is null ? "" : $"  {manny.TaskProgressPercent:F0}%";
-            var btn  = MannyBtn(manny, $"{dot} {manny.Name}  {task}{prog}");
+            var btn = MannyBtn(manny, $"{dot} {manny.Name}  {task}{prog}");
             btn.Modulate = manny.CurrentTask switch
             {
                 MannyTask.Repair => new Color(1.0f, 0.4f, 0.4f),
-                null             => new Color(0.5f, 0.5f, 0.6f),
-                _                => new Color(1.0f, 0.85f, 0.25f),
+                null => new Color(0.5f, 0.5f, 0.6f),
+                _ => new Color(1.0f, 0.85f, 0.25f),
             };
             _manniesBox.AddChild(btn);
         }
@@ -437,12 +437,12 @@ public partial class Hud : CanvasLayer
         var icon = obj.ObjectType switch
         {
             SectorObjectType.SolarSystem => "★",
-            SectorObjectType.Star        => "✦",
-            SectorObjectType.Planet      => "◑",
-            SectorObjectType.Asteroid    => "▲",
-            SectorObjectType.BlackHole   => "◉",
-            SectorObjectType.DustCloud   => "∿",
-            _                            => "·",
+            SectorObjectType.Star => "✦",
+            SectorObjectType.Planet => "◑",
+            SectorObjectType.Asteroid => "▲",
+            SectorObjectType.BlackHole => "◉",
+            SectorObjectType.DustCloud => "∿",
+            _ => "·",
         };
 
         // Name / type header — colour by object type
@@ -492,12 +492,12 @@ public partial class Hud : CanvasLayer
             else
             {
                 // Fallback: parse summary
-                int    stars      = Helpers.ParseStarCount(obj.Summary);
-                int    orbital    = Helpers.ParseOrbitalCount(obj.Summary);
-                double mps        = (obj.Mass ?? 2.0) / Math.Max(stars, 1);
+                int stars = Helpers.ParseStarCount(obj.Summary);
+                int orbital = Helpers.ParseOrbitalCount(obj.Summary);
+                double mps = (obj.Mass ?? 2.0) / Math.Max(stars, 1);
                 for (int i = 0; i < stars; i++)
                     Lbl(box, $"   ✦  star  {mps:F1} M☉  [{SpectralClass(mps)}]", SpectralColor(mps));
-                int asts    = obj.MinableTargets?.Count ?? 0;
+                int asts = obj.MinableTargets?.Count ?? 0;
                 int planets = Math.Max(orbital - asts, 0);
                 for (int i = 0; i < planets; i++)
                     Lbl(box, "   ◑  planet", new Color(0.5f, 0.78f, 1.0f));
@@ -558,13 +558,13 @@ public partial class Hud : CanvasLayer
                 else
                 {
                     // Fallback to summary parsing
-                    int    stars   = Helpers.ParseStarCount(obj.Summary);
-                    int    orbital = Helpers.ParseOrbitalCount(obj.Summary);
-                    double mps     = (obj.Mass ?? 2.0) / Math.Max(stars, 1);
+                    int stars = Helpers.ParseStarCount(obj.Summary);
+                    int orbital = Helpers.ParseOrbitalCount(obj.Summary);
+                    double mps = (obj.Mass ?? 2.0) / Math.Max(stars, 1);
                     for (int i = 0; i < stars; i++)
                         Lbl(box, $"   ✦ [{SpectralClass(mps)}]  {mps:F1} M☉", SpectralColor(mps));
                     int asts = obj.MinableTargets?.Count ?? 0;
-                    int pls  = Math.Max(orbital - asts, 0);
+                    int pls = Math.Max(orbital - asts, 0);
                     if (pls > 0)
                         Lbl(box, $"   ◑ {pls} planet{(pls > 1 ? "s" : "")}",
                             new Color(0.5f, 0.78f, 1.0f));
@@ -639,9 +639,9 @@ public partial class Hud : CanvasLayer
     private static IEnumerable<(int X, int Y, int Z)> FccNeighbors(int x, int y, int z)
     {
         int[] d = { -1, 1 };
-        foreach (var dx in d) foreach (var dy in d) yield return (x+dx, y+dy, z);
-        foreach (var dx in d) foreach (var dz in d) yield return (x+dx, y,    z+dz);
-        foreach (var dy in d) foreach (var dz in d) yield return (x,    y+dy, z+dz);
+        foreach (var dx in d) foreach (var dy in d) yield return (x + dx, y + dy, z);
+        foreach (var dx in d) foreach (var dz in d) yield return (x + dx, y, z + dz);
+        foreach (var dy in d) foreach (var dz in d) yield return (x, y + dy, z + dz);
     }
 
     private static void SectionHeader(VBoxContainer parent, string title)
@@ -656,15 +656,15 @@ public partial class Hud : CanvasLayer
     {
         var btn = new Button
         {
-            Text      = text,
+            Text = text,
             FocusMode = Control.FocusModeEnum.None,
             MouseDefaultCursorShape = Control.CursorShape.PointingHand,
         };
         btn.AddThemeFontSizeOverride("font_size", 11);
-        btn.AddThemeStyleboxOverride("normal",  BtnStyle(new Color(0.1f, 0.15f, 0.28f, 0.7f)));
-        btn.AddThemeStyleboxOverride("hover",   BtnStyle(new Color(0.2f, 0.3f,  0.5f,  0.85f)));
+        btn.AddThemeStyleboxOverride("normal", BtnStyle(new Color(0.1f, 0.15f, 0.28f, 0.7f)));
+        btn.AddThemeStyleboxOverride("hover", BtnStyle(new Color(0.2f, 0.3f, 0.5f, 0.85f)));
         btn.AddThemeStyleboxOverride("pressed", BtnStyle(new Color(0.06f, 0.1f, 0.22f, 0.9f)));
-        btn.AddThemeStyleboxOverride("focus",   new StyleBoxEmpty());
+        btn.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
         btn.Pressed += () => onPress();
         return btn;
     }
@@ -715,16 +715,16 @@ public partial class Hud : CanvasLayer
     {
         var btn = new Button
         {
-            Text                    = text,
-            Alignment               = HorizontalAlignment.Left,
-            FocusMode               = Control.FocusModeEnum.None,
+            Text = text,
+            Alignment = HorizontalAlignment.Left,
+            FocusMode = Control.FocusModeEnum.None,
             MouseDefaultCursorShape = Control.CursorShape.PointingHand,
         };
         btn.AddThemeFontSizeOverride("font_size", 12);
-        btn.AddThemeStyleboxOverride("normal",  new StyleBoxEmpty());
-        btn.AddThemeStyleboxOverride("hover",   HoverStyle());
+        btn.AddThemeStyleboxOverride("normal", new StyleBoxEmpty());
+        btn.AddThemeStyleboxOverride("hover", HoverStyle());
         btn.AddThemeStyleboxOverride("pressed", HoverStyle());
-        btn.AddThemeStyleboxOverride("focus",   new StyleBoxEmpty());
+        btn.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
         btn.Pressed += () => ShowMannyPopup(manny, btn.GlobalPosition + new Vector2(0, btn.Size.Y));
         return btn;
     }
@@ -733,10 +733,10 @@ public partial class Hud : CanvasLayer
     {
         var le = new LineEdit
         {
-            PlaceholderText   = placeholder,
+            PlaceholderText = placeholder,
             CustomMinimumSize = new Vector2(44, 0),
-            MaxLength         = 5,
-            Alignment         = HorizontalAlignment.Center,
+            MaxLength = 5,
+            Alignment = HorizontalAlignment.Center,
         };
         le.AddThemeFontSizeOverride("font_size", 12);
         return le;
@@ -753,13 +753,17 @@ public partial class Hud : CanvasLayer
 
     private static Button Btn(string text, Action onPress)
     {
-        var btn = new Button { Text = text, FocusMode = Control.FocusModeEnum.None,
-                               MouseDefaultCursorShape = Control.CursorShape.PointingHand };
+        var btn = new Button
+        {
+            Text = text,
+            FocusMode = Control.FocusModeEnum.None,
+            MouseDefaultCursorShape = Control.CursorShape.PointingHand
+        };
         btn.AddThemeFontSizeOverride("font_size", 12);
-        btn.AddThemeStyleboxOverride("normal",  BtnStyle(new Color(0.12f, 0.18f, 0.3f, 0.7f)));
-        btn.AddThemeStyleboxOverride("hover",   BtnStyle(new Color(0.2f,  0.3f,  0.5f, 0.85f)));
+        btn.AddThemeStyleboxOverride("normal", BtnStyle(new Color(0.12f, 0.18f, 0.3f, 0.7f)));
+        btn.AddThemeStyleboxOverride("hover", BtnStyle(new Color(0.2f, 0.3f, 0.5f, 0.85f)));
         btn.AddThemeStyleboxOverride("pressed", BtnStyle(new Color(0.08f, 0.12f, 0.25f, 0.9f)));
-        btn.AddThemeStyleboxOverride("focus",   new StyleBoxEmpty());
+        btn.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
         btn.Pressed += () => onPress();
         return btn;
     }
@@ -771,29 +775,43 @@ public partial class Hud : CanvasLayer
         {
             BgColor = bg,
             BorderColor = new Color(0.18f, 0.25f, 0.42f, 0.5f),
-            BorderWidthLeft = 1, BorderWidthRight  = 1,
-            BorderWidthTop  = 1, BorderWidthBottom = 1,
-            CornerRadiusTopLeft    = 4, CornerRadiusTopRight    = 4,
-            CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4,
+            BorderWidthLeft = 1,
+            BorderWidthRight = 1,
+            BorderWidthTop = 1,
+            BorderWidthBottom = 1,
+            CornerRadiusTopLeft = 4,
+            CornerRadiusTopRight = 4,
+            CornerRadiusBottomLeft = 4,
+            CornerRadiusBottomRight = 4,
         });
         return p;
     }
 
     private static StyleBoxFlat BtnStyle(Color bg) => new()
     {
-        BgColor = bg, BorderColor = new Color(0.3f, 0.4f, 0.6f, 0.5f),
-        BorderWidthLeft = 1, BorderWidthRight = 1, BorderWidthTop = 1, BorderWidthBottom = 1,
-        CornerRadiusTopLeft = 3, CornerRadiusTopRight = 3,
-        CornerRadiusBottomLeft = 3, CornerRadiusBottomRight = 3,
-        ContentMarginLeft = 10, ContentMarginRight = 10,
-        ContentMarginTop = 3, ContentMarginBottom = 3,
+        BgColor = bg,
+        BorderColor = new Color(0.3f, 0.4f, 0.6f, 0.5f),
+        BorderWidthLeft = 1,
+        BorderWidthRight = 1,
+        BorderWidthTop = 1,
+        BorderWidthBottom = 1,
+        CornerRadiusTopLeft = 3,
+        CornerRadiusTopRight = 3,
+        CornerRadiusBottomLeft = 3,
+        CornerRadiusBottomRight = 3,
+        ContentMarginLeft = 10,
+        ContentMarginRight = 10,
+        ContentMarginTop = 3,
+        ContentMarginBottom = 3,
     };
 
     private static StyleBoxFlat HoverStyle() => new()
     {
         BgColor = new Color(0.2f, 0.3f, 0.5f, 0.25f),
-        CornerRadiusTopLeft = 3, CornerRadiusTopRight = 3,
-        CornerRadiusBottomLeft = 3, CornerRadiusBottomRight = 3,
+        CornerRadiusTopLeft = 3,
+        CornerRadiusTopRight = 3,
+        CornerRadiusBottomLeft = 3,
+        CornerRadiusBottomRight = 3,
     };
 
     private static void Clear(VBoxContainer box)
@@ -806,62 +824,62 @@ public partial class Hud : CanvasLayer
     private static int SectorSortKey(SectorObservation obs) =>
         (HasAsteroids(obs) ? 0 : 10) + obs.KnowledgeLevel switch
         {
-            KnowledgeLevel.Detailed            => 0,
-            KnowledgeLevel.NeighborScan        => 1,
-            KnowledgeLevel.DistantScan         => 2,
+            KnowledgeLevel.Detailed => 0,
+            KnowledgeLevel.NeighborScan => 1,
+            KnowledgeLevel.DistantScan => 2,
             KnowledgeLevel.LongRangeEstimation => 3,
-            _                                  => 4,
+            _ => 4,
         };
 
     private static bool HasAsteroids(SectorObservation obs) =>
         obs.Objects?.Any(o => o.MinableTargets is { Count: > 0 }) == true;
 
     private static Color AsteroidColor => new(1.0f, 0.7f, 0.2f);
-    private static Color Dim           => new(0.4f, 0.42f, 0.5f);
+    private static Color Dim => new(0.4f, 0.42f, 0.5f);
 
     private static Color KnowledgeColor(KnowledgeLevel lvl) => lvl switch
     {
-        KnowledgeLevel.Detailed            => new Color(0.4f, 0.9f, 0.5f),
-        KnowledgeLevel.NeighborScan        => new Color(0.6f, 0.8f, 1.0f),
-        KnowledgeLevel.DistantScan         => new Color(0.6f, 0.65f, 0.8f),
+        KnowledgeLevel.Detailed => new Color(0.4f, 0.9f, 0.5f),
+        KnowledgeLevel.NeighborScan => new Color(0.6f, 0.8f, 1.0f),
+        KnowledgeLevel.DistantScan => new Color(0.6f, 0.65f, 0.8f),
         KnowledgeLevel.LongRangeEstimation => new Color(0.5f, 0.5f, 0.65f),
-        _                                  => Dim,
+        _ => Dim,
     };
 
     private static Color DangerColor(DangerLevel d) => d switch
     {
-        DangerLevel.Low      => new Color(0.4f, 0.75f, 0.4f),
+        DangerLevel.Low => new Color(0.4f, 0.75f, 0.4f),
         DangerLevel.Moderate => new Color(0.9f, 0.75f, 0.2f),
-        DangerLevel.Extreme  => new Color(0.95f, 0.3f, 0.3f),
-        _                    => Dim,
+        DangerLevel.Extreme => new Color(0.95f, 0.3f, 0.3f),
+        _ => Dim,
     };
 
     private static Color ObjectTypeColor(SectorObjectType t) => t switch
     {
-        SectorObjectType.SolarSystem => new Color(0.95f, 0.9f,  0.5f),  // warm gold
-        SectorObjectType.Star        => new Color(1.0f,  0.85f, 0.25f), // yellow
-        SectorObjectType.Planet      => new Color(0.5f,  0.78f, 1.0f),  // blue
-        SectorObjectType.Asteroid    => AsteroidColor,                   // orange
-        SectorObjectType.BlackHole   => new Color(0.8f,  0.3f,  1.0f),  // purple
-        SectorObjectType.DustCloud   => new Color(0.55f, 0.6f,  0.65f), // grey-blue
-        _                            => new Color(0.75f, 0.8f,  0.85f),
+        SectorObjectType.SolarSystem => new Color(0.95f, 0.9f, 0.5f),  // warm gold
+        SectorObjectType.Star => new Color(1.0f, 0.85f, 0.25f), // yellow
+        SectorObjectType.Planet => new Color(0.5f, 0.78f, 1.0f),  // blue
+        SectorObjectType.Asteroid => AsteroidColor,                   // orange
+        SectorObjectType.BlackHole => new Color(0.8f, 0.3f, 1.0f),  // purple
+        SectorObjectType.DustCloud => new Color(0.55f, 0.6f, 0.65f), // grey-blue
+        _ => new Color(0.75f, 0.8f, 0.85f),
     };
 
     private static int ObjectSortKey(Api.Models.SectorObject o) => o.ObjectType switch
     {
         SectorObjectType.SolarSystem => 0,
-        SectorObjectType.Star        => 1,
-        SectorObjectType.Planet      => 2,
-        SectorObjectType.Asteroid    => 3,
-        SectorObjectType.BlackHole   => 4,
-        _                            => 5,
+        SectorObjectType.Star => 1,
+        SectorObjectType.Planet => 2,
+        SectorObjectType.Asteroid => 3,
+        SectorObjectType.BlackHole => 4,
+        _ => 5,
     };
 
     private static Color GaugeColor(double r) => r switch
     {
-        > 0.5  => new Color(0.3f, 0.9f, 0.3f),
+        > 0.5 => new Color(0.3f, 0.9f, 0.3f),
         > 0.25 => new Color(0.9f, 0.8f, 0.2f),
-        _      => new Color(0.9f, 0.2f, 0.2f),
+        _ => new Color(0.9f, 0.2f, 0.2f),
     };
 
     // ── Misc helpers ──────────────────────────────────────────────────────────
@@ -883,29 +901,33 @@ public partial class Hud : CanvasLayer
 
     private static string KnowledgeAbbrev(KnowledgeLevel l) => l switch
     {
-        KnowledgeLevel.Detailed            => "detailed",
-        KnowledgeLevel.NeighborScan        => "neighbor",
-        KnowledgeLevel.DistantScan         => "distant",
+        KnowledgeLevel.Detailed => "detailed",
+        KnowledgeLevel.NeighborScan => "neighbor",
+        KnowledgeLevel.DistantScan => "distant",
         KnowledgeLevel.LongRangeEstimation => "estimated",
-        _                                  => "?",
+        _ => "?",
     };
 
     private static string SpectralClass(double mass) => mass switch
     {
-        >= 30.0 => "O", >= 10.0 => "B", >= 4.0 => "A",
-        >= 1.5  => "F", >= 0.9  => "G", >= 0.5  => "K",
-        _       => "M",
+        >= 30.0 => "O",
+        >= 10.0 => "B",
+        >= 4.0 => "A",
+        >= 1.5 => "F",
+        >= 0.9 => "G",
+        >= 0.5 => "K",
+        _ => "M",
     };
 
     private static Color SpectralColor(double mass) => mass switch
     {
         >= 30.0 => new Color(0.65f, 0.75f, 1.0f),
         >= 10.0 => new Color(0.80f, 0.88f, 1.0f),
-        >= 4.0  => new Color(0.98f, 0.98f, 1.0f),
-        >= 1.5  => new Color(1.0f,  1.0f,  0.85f),
-        >= 0.9  => new Color(1.0f,  0.92f, 0.5f),
-        >= 0.5  => new Color(1.0f,  0.65f, 0.3f),
-        _       => new Color(1.0f,  0.3f,  0.15f),
+        >= 4.0 => new Color(0.98f, 0.98f, 1.0f),
+        >= 1.5 => new Color(1.0f, 1.0f, 0.85f),
+        >= 0.9 => new Color(1.0f, 0.92f, 0.5f),
+        >= 0.5 => new Color(1.0f, 0.65f, 0.3f),
+        _ => new Color(1.0f, 0.3f, 0.15f),
     };
 
     private static void Anc(Control c, float l, float t, float r, float b)
