@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    name: Export ${{ matrix.preset }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - preset: Linux
+            artifact: neumann-orbital-linux-x86_64
+            binary: builds/neumann-orbital-linux-x86_64.x86_64
+            archive_cmd: tar czf neumann-orbital-linux-x86_64.tar.gz -C builds neumann-orbital-linux-x86_64.x86_64
+            archive: neumann-orbital-linux-x86_64.tar.gz
+
+          - preset: Windows
+            artifact: neumann-orbital-windows-x86_64
+            binary: builds/neumann-orbital-windows-x86_64.exe
+            archive_cmd: zip neumann-orbital-windows-x86_64.zip builds/neumann-orbital-windows-x86_64.exe
+            archive: neumann-orbital-windows-x86_64.zip
+
+          - preset: macOS
+            artifact: neumann-orbital-macos
+            binary: builds/neumann-orbital-macos.zip
+            archive_cmd: cp builds/neumann-orbital-macos.zip neumann-orbital-macos.zip
+            archive: neumann-orbital-macos.zip
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: "8.0"
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.6.3
+          use-dotnet: true
+          include-templates: true
+
+      - name: Build C#
+        run: dotnet build neumann-orbital.csproj --configuration Release
+
+      - name: Import assets
+        run: godot --headless --import
+
+      - name: Export
+        run: |
+          mkdir -p builds
+          godot --headless --export-release "${{ matrix.preset }}"
+
+      - name: Package
+        run: ${{ matrix.archive_cmd }}
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
+        with:
+          files: ${{ matrix.archive }}

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://space"]
+
+[ext_resource type="Script" path="res://src/UI/SpaceScene.cs" id="1"]
+
+[node name="Space" type="Node3D"]
+script = ExtResource("1")

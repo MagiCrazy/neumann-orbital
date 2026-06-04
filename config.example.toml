@@ -1,0 +1,3 @@
+# Copy to ~/.config/neumann-orbital/config.toml and fill in your credentials.
+base_url = "https://neumann-probe.net"
+api_key  = "vng_your_api_key_here"

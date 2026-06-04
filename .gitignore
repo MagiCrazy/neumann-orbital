@@ -1,0 +1,28 @@
+# Godot
+.godot/
+*.translation
+export_presets.cfg
+
+# Godot .NET build artifacts
+.mono/
+*.dll.rsp
+*.csproj.user
+*.sln.DotSettings.user
+
+# .NET
+obj/
+bin/
+*.user
+
+# Godot export
+builds/
+
+# Editor metadata
+.editorconfig.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Raw asset packs — large source files, not committed (only resources/ is)
+assets/

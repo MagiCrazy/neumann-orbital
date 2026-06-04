@@ -1,0 +1,17 @@
+[tools]
+dotnet = "8.0.421"
+
+[env]
+GODOT = "/usr/bin/godot-mono"
+
+[tasks.build]
+description = "Build C# solution"
+run = "dotnet build neumann-orbital.csproj"
+
+[tasks.run]
+description = "Launch the game"
+run = "$GODOT --path ."
+
+[tasks.editor]
+description = "Open project in Godot editor"
+run = "$GODOT --editor --path ."
