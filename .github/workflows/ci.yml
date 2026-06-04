@@ -26,8 +26,14 @@ jobs:
           version: 4.6.3
           use-dotnet: true
 
+      - name: Format check
+        run: dotnet format --verify-no-changes neumann-orbital.csproj
+
       - name: Build
-        run: dotnet build neumann-orbital.csproj
+        run: dotnet build neumann-orbital.csproj -warnaserror
+
+      - name: Build release
+        run: dotnet build neumann-orbital.csproj --configuration Release -warnaserror
 
       - name: Import assets
         run: godot --headless --import
