@@ -490,7 +490,7 @@ public partial class SpaceScene : Node3D
         Text = text,
         FontSize = 24,
         Modulate = new Color(0.35f, 0.38f, 0.52f),
-        Billboard = BaseMaterial3D.BillboardMode.Enabled,
+        Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
         NoDepthTest = true,
         Position = new Vector3(0f, 0f, -15f),
     };
