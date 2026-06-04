@@ -27,7 +27,7 @@ public partial class AppState : Node
     // scan_history.json — shared with neumann-cockpit, same format
     private static readonly string[] ScanHistoryPaths =
     [
-        AppConfig.XdgConfig("neumann",         "scan_history.json"),
+        AppConfig.XdgConfig("neumann", "scan_history.json"),
         AppConfig.XdgConfig("neumann-cockpit", "scan_history.json"),
     ];
 
@@ -171,7 +171,7 @@ public partial class AppState : Node
             Callable.From(() => EmitSignal(SignalName.ProbeUpdated)).CallDeferred();
         }
         catch (Exception ex) when (!ct.IsCancellationRequested)
-            { GD.PrintErr($"[AppState] RefreshProbe: {ex.Message}"); }
+        { GD.PrintErr($"[AppState] RefreshProbe: {ex.Message}"); }
     }
 
     private async Task RefreshManniesAsync(CancellationToken ct)
@@ -182,7 +182,7 @@ public partial class AppState : Node
             Callable.From(() => EmitSignal(SignalName.ManniesUpdated)).CallDeferred();
         }
         catch (Exception ex) when (!ct.IsCancellationRequested)
-            { GD.PrintErr($"[AppState] RefreshMannies: {ex.Message}"); }
+        { GD.PrintErr($"[AppState] RefreshMannies: {ex.Message}"); }
     }
 
     private async Task RefreshProbeSectorAsync(CancellationToken ct)
@@ -193,7 +193,7 @@ public partial class AppState : Node
             StoreSector(ToIntCoords(obs.RelativeCoordinates), obs);
         }
         catch (Exception ex) when (!ct.IsCancellationRequested)
-            { GD.PrintErr($"[AppState] RefreshProbeSector: {ex.Message}"); }
+        { GD.PrintErr($"[AppState] RefreshProbeSector: {ex.Message}"); }
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────

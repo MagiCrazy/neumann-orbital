@@ -5,13 +5,13 @@ namespace NeumannOrbital.UI;
 public partial class CameraRig : Node3D
 {
     private Camera3D _camera = null!;
-    private float _yaw      = 0.4f;
-    private float _pitch    = 0.3f;
+    private float _yaw = 0.4f;
+    private float _pitch = 0.3f;
     private float _distance = 80.0f;
     private bool _dragging;
 
-    private const float PanSpeed    = 0.005f;
-    private const float ZoomStep    = 8.0f;
+    private const float PanSpeed = 0.005f;
+    private const float ZoomStep = 8.0f;
     private const float MinDistance = 5.0f;
     private const float MaxDistance = 1000.0f;
 
@@ -26,10 +26,10 @@ public partial class CameraRig : Node3D
 
     public override void _Process(double delta)
     {
-        if (Input.IsKeyPressed(Key.Left))  _yaw += 1.2f * (float)delta;
+        if (Input.IsKeyPressed(Key.Left)) _yaw += 1.2f * (float)delta;
         if (Input.IsKeyPressed(Key.Right)) _yaw -= 1.2f * (float)delta;
-        if (Input.IsKeyPressed(Key.Up))    _pitch = Mathf.Clamp(_pitch + 1.0f * (float)delta, -1.4f, 1.4f);
-        if (Input.IsKeyPressed(Key.Down))  _pitch = Mathf.Clamp(_pitch - 1.0f * (float)delta, -1.4f, 1.4f);
+        if (Input.IsKeyPressed(Key.Up)) _pitch = Mathf.Clamp(_pitch + 1.0f * (float)delta, -1.4f, 1.4f);
+        if (Input.IsKeyPressed(Key.Down)) _pitch = Mathf.Clamp(_pitch - 1.0f * (float)delta, -1.4f, 1.4f);
         if (Input.IsKeyPressed(Key.Equal)) _distance = Mathf.Clamp(_distance - ZoomStep * (float)delta * 10f, MinDistance, MaxDistance);
         if (Input.IsKeyPressed(Key.Minus)) _distance = Mathf.Clamp(_distance + ZoomStep * (float)delta * 10f, MinDistance, MaxDistance);
 
@@ -50,8 +50,8 @@ public partial class CameraRig : Node3D
 
         if (@event is InputEventMouseMotion mm && _dragging)
         {
-            _yaw   -= mm.Relative.X * PanSpeed;
-            _pitch  = Mathf.Clamp(_pitch + mm.Relative.Y * PanSpeed, -1.4f, 1.4f);
+            _yaw -= mm.Relative.X * PanSpeed;
+            _pitch = Mathf.Clamp(_pitch + mm.Relative.Y * PanSpeed, -1.4f, 1.4f);
         }
     }
 

@@ -16,7 +16,7 @@ public record AppConfig(string BaseUrl, string ApiKey)
             [
                 Environment.GetEnvironmentVariable("XDG_CONFIG_HOME")
                     ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config"),
-                ..segments
+                .. segments
             ]
         );
 

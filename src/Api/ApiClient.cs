@@ -123,13 +123,13 @@ public class ApiClient : IDisposable
     {
         GD.Print($"[API] POST {path}");
 
-        var json    = JsonSerializer.Serialize(body, JsonOptions);
+        var json = JsonSerializer.Serialize(body, JsonOptions);
         var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
         HttpResponseMessage resp;
         try { resp = await _http.PostAsync(path, content, ct); }
         catch (Exception ex) when (!ct.IsCancellationRequested)
-            { throw new HttpRequestException($"POST {path}: {ex.Message}", ex); }
+        { throw new HttpRequestException($"POST {path}: {ex.Message}", ex); }
 
         GD.Print($"[API] POST {path} → {(int)resp.StatusCode}");
 
